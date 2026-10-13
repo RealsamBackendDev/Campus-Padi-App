@@ -1,0 +1,483 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum School {
+  UI
+  POLY_IBADAN
+  LEAD_CITY
+  LAUTECH
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum FoodOrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  DELIVERED
+  CANCELLED
+}
+
+enum ProjectStatus {
+  OPEN
+  CLOSED
+  COMPLETED
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum TutorSessionStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id                   String   @id @default(uuid())
+  phone                String   @unique
+  password             String
+  name                 String
+  email                String?  @unique
+  role                 Role     @default(STUDENT)
+  school               School
+  department           String?
+  studentId            String?  @unique
+  profileImage         String?
+  isVerified           Boolean  @default(false)
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  serviceRequests      ServiceRequest[] @relation("StudentRequests")
+  reviewsGiven         Review[] @relation("Reviewer")
+  reviewsReceived      Review[] @relation("Reviewee")
+  artisanProfile       Artisan?
+  materials            Material[]
+  foodOrders           FoodOrder[]
+  accommodations       Accommodation[]
+  accommodationInquiries AccommodationInquiry[]
+  ownedProjects        GroupProject[] @relation("ProjectOwner")
+  projectApplications  ProjectApplication[]
+  projectMemberships   ProjectMember[]
+  tutorProfile         Tutor?
+  tutorSessionsAsStudent TutorSession[] @relation("StudentSessions")
+  resitSquadsCreated   ResitSquad[] @relation("SquadCreator")
+  resitSquadMemberships ResitSquadMember[]
+  ridePoolsCreated     RidePool[] @relation("RidePoolCreator")
+  ridePoolMemberships  RidePoolMember[]
+  safeWalksCreated     SafeWalk[] @relation("SafeWalkCreator")
+  safeWalkMemberships  SafeWalkMember[]
+
+  @@map("users")
+}
+
+model Artisan {
+  id              String   @id @default(uuid())
+  userId          String?  @unique @map("user_id")
+  name            String
+  phone           String   @unique
+  email           String?  @unique
+  skills          String[]
+  schools         School[]
+  location        String
+  address         String?
+  bio             String?
+  profileImage    String?  @map("profile_image")
+  verificationDoc String?  @map("verification_doc")
+  isVerified      Boolean  @default(false)
+  rating          Float    @default(0)
+  reviewCount     Int      @default(0) @map("review_count")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user            User?    @relation(fields: [userId], references: [id])
+  serviceRequests ServiceRequest[]
+  reviews         Review[]
+
+  @@map("artisans")
+}
+
+model ServiceRequest {
+  id          String        @id @default(uuid())
+  school      School
+  category    String
+  description String
+  location    String
+  budget      Float?
+  status      RequestStatus @default(PENDING)
+  price       Float?
+  scheduledAt DateTime?     @map("scheduled_at")
+  completedAt DateTime?     @map("completed_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  studentId   String        @map("student_id")
+  student     User          @relation("StudentRequests", fields: [studentId], references: [id])
+  artisanId   String?       @map("artisan_id")
+  artisan     Artisan?      @relation(fields: [artisanId], references: [id])
+  review      Review?
+
+  @@map("service_requests")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  serviceRequestId String         @unique @map("service_request_id")
+  serviceRequest   ServiceRequest @relation(fields: [serviceRequestId], references: [id])
+
+  reviewerId String @map("reviewer_id")
+  reviewer   User   @relation("Reviewer", fields: [reviewerId], references: [id])
+
+  revieweeId String @map("reviewee_id")
+  reviewee   User   @relation("Reviewee", fields: [revieweeId], references: [id])
+
+  artisanId String?  @map("artisan_id")
+  artisan   Artisan? @relation(fields: [artisanId], references: [id])
+
+  @@map("reviews")
+}
+
+model Material {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  courseCode    String   @map("course_code")
+  department    String
+  level         String
+  school        School
+  fileUrl       String   @map("file_url")
+  fileType      String   @map("file_type")
+  price         Float    @default(0)
+  downloadCount Int      @default(0) @map("download_count")
+  isApproved    Boolean  @default(false)
+  uploaderId    String   @map("uploader_id")
+  uploader      User     @relation(fields: [uploaderId], references: [id])
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("materials")
+}
+
+model Vendor {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String   @unique
+  email       String?  @unique
+  school      School
+  location    String
+  address     String?
+  openingTime String?  @map("opening_time")
+  closingTime String?  @map("closing_time")
+  logoUrl     String?  @map("logo_url")
+  isVerified  Boolean  @default(false)
+  isOpen      Boolean  @default(true)
+  rating      Float    @default(0)
+  reviewCount Int      @default(0) @map("review_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  menuItems FoodOrderItem[]
+  orders    FoodOrder[]
+
+  @@map("vendors")
+}
+
+model MenuItem {
+  id               String   @id @default(uuid())
+  vendorId         String   @map("vendor_id")
+  name             String
+  description      String?
+  price            Float
+  category         String
+  imageUrl         String?  @map("image_url")
+  isAvailable      Boolean  @default(true)
+  isStudentSpecial Boolean  @default(false) @map("is_student_special")
+  preparationTime  Int?     @map("preparation_time")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  vendor     Vendor          @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  orderItems FoodOrderItem[]
+
+  @@map("menu_items")
+}
+
+model FoodOrder {
+  id             String          @id @default(uuid())
+  studentId      String          @map("student_id")
+  student        User            @relation(fields: [studentId], references: [id])
+  vendorId       String          @map("vendor_id")
+  vendor         Vendor          @relation(fields: [vendorId], references: [id])
+  status         FoodOrderStatus @default(PENDING)
+  totalAmount    Float           @map("total_amount")
+  pickupLocation String?         @map("pickup_location")
+  notes          String?
+  deliveryFee    Float?          @map("delivery_fee")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  items FoodOrderItem[]
+
+  @@map("food_orders")
+}
+
+model FoodOrderItem {
+  id         String   @id @default(uuid())
+  orderId    String   @map("order_id")
+  order      FoodOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId String   @map("menu_item_id")
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  quantity   Int
+  unitPrice  Float    @map("unit_price")
+  subtotal   Float
+
+  @@map("food_order_items")
+}
+
+model Accommodation {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  price         Float
+  pricePeriod   String   @default("year") @map("price_period")
+  location      String
+  address       String?
+  type          String
+  amenities     String[]
+  images        String[]
+  landlordName  String   @map("landlord_name")
+  landlordPhone String   @map("landlord_phone")
+  isVerified    Boolean  @default(false)
+  isAvailable   Boolean  @default(true)
+  school        School
+  listedById    String   @map("listed_by_id")
+  listedBy      User     @relation(fields: [listedById], references: [id])
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  inquiries AccommodationInquiry[]
+
+  @@map("accommodations")
+}
+
+model AccommodationInquiry {
+  id              String   @id @default(uuid())
+  accommodationId String   @map("accommodation_id")
+  accommodation   Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+  studentId       String   @map("student_id")
+  student         User     @relation(fields: [studentId], references: [id])
+  status          String   @default("PENDING")
+  message         String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("accommodation_inquiries")
+}
+
+model GroupProject {
+  id            String        @id @default(uuid())
+  title         String
+  description   String
+  courseCode    String        @map("course_code")
+  department    String
+  school        School
+  maxMembers    Int           @map("max_members")
+  skillsNeeded  String[]      @map("skills_needed")
+  deadline      DateTime?
+  status        ProjectStatus @default(OPEN)
+  ownerId       String        @map("owner_id")
+  owner         User          @relation("ProjectOwner", fields: [ownerId], references: [id])
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  members       ProjectMember[]
+  applications  ProjectApplication[]
+
+  @@map("group_projects")
+}
+
+model ProjectMember {
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  project   GroupProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  role      String   @default("member")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+model ProjectApplication {
+  id        String            @id @default(uuid())
+  projectId String            @map("project_id")
+  project   GroupProject      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String            @map("user_id")
+  user      User              @relation(fields: [userId], references: [id])
+  status    ApplicationStatus @default(PENDING)
+  message   String?
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  @@unique([projectId, userId])
+  @@map("project_applications")
+}
+
+model Tutor {
+  id          String   @id @default(uuid())
+  userId      String   @unique @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+  courses     String[]
+  rate        Float    @default(0)
+  bio         String?
+  isVerified  Boolean  @default(false)
+  rating      Float    @default(0)
+  reviewCount Int      @default(0) @map("review_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  sessions TutorSession[] @relation("TutorSessions")
+
+  @@map("tutors")
+}
+
+model TutorSession {
+  id          String             @id @default(uuid())
+  tutorId     String             @map("tutor_id")
+  tutor       Tutor              @relation("TutorSessions", fields: [tutorId], references: [id])
+  studentId   String             @map("student_id")
+  student     User               @relation("StudentSessions", fields: [studentId], references: [id])
+  courseCode  String             @map("course_code")
+  status      TutorSessionStatus @default(PENDING)
+  scheduledAt DateTime           @map("scheduled_at")
+  duration    Int
+  price       Float
+  location    String?
+  notes       String?
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  @@map("tutor_sessions")
+}
+
+model ResitSquad {
+  id          String   @id @default(uuid())
+  courseCode  String   @map("course_code")
+  department  String
+  school      School
+  level       String
+  maxMembers  Int      @map("max_members")
+  description String?
+  status      String   @default("OPEN")
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation("SquadCreator", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  members ResitSquadMember[]
+
+  @@map("resit_squads")
+}
+
+model ResitSquadMember {
+  id         String     @id @default(uuid())
+  squadId    String     @map("squad_id")
+  squad      ResitSquad @relation(fields: [squadId], references: [id], onDelete: Cascade)
+  userId     String     @map("user_id")
+  user       User       @relation(fields: [userId], references: [id])
+  joinedAt   DateTime   @default(now()) @map("joined_at")
+
+  @@unique([squadId, userId])
+  @@map("resit_squad_members")
+}
+
+model RidePool {
+  id            String   @id @default(uuid())
+  school        School
+  fromLocation  String   @map("from_location")
+  toLocation    String   @map("to_location")
+  departureTime DateTime @map("departure_time")
+  maxRiders     Int      @map("max_riders")
+  pricePerRider Float    @map("price_per_rider")
+  vehicleType   String   @map("vehicle_type")
+  status        String   @default("OPEN")
+  creatorId     String   @map("creator_id")
+  creator       User     @relation("RidePoolCreator", fields: [creatorId], references: [id])
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  members RidePoolMember[]
+
+  @@map("ride_pools")
+}
+
+model RidePoolMember {
+  id       String   @id @default(uuid())
+  poolId   String   @map("pool_id")
+  pool     RidePool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  userId   String   @map("user_id")
+  user     User     @relation(fields: [userId], references: [id])
+  joinedAt DateTime @default(now()) @map("joined_at")
+
+  @@unique([poolId, userId])
+  @@map("ride_pool_members")
+}
+
+model SafeWalk {
+  id            String   @id @default(uuid())
+  school        School
+  fromLocation  String   @map("from_location")
+  toLocation    String   @map("to_location")
+  departureTime DateTime @map("departure_time")
+  maxWalkers    Int      @default(5) @map("max_walkers")
+  status        String   @default("OPEN")
+  creatorId     String   @map("creator_id")
+  creator       User     @relation("SafeWalkCreator", fields: [creatorId], references: [id])
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  members SafeWalkMember[]
+
+  @@map("safe_walks")
+}
+
+model SafeWalkMember {
+  id        String   @id @default(uuid())
+  walkId    String   @map("walk_id")
+  walk      SafeWalk @relation(fields: [walkId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  joinedAt  DateTime @default(now()) @map("joined_at")
+  checkedIn Boolean  @default(false) @map("checked_in")
+
+  @@unique([walkId, userId])
+  @@map("safe_walk_members")
+}
