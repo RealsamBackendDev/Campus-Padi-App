@@ -1,4 +1,4 @@
-const BASE_URL = process.env.API_URL || 'http://localhost:5000/api';
+const BASE_URL = process.env.API_URL || 'http://localhost:5001/api';
 
 let studentToken = '';
 let adminToken = '';
