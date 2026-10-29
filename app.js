@@ -3,24 +3,26 @@ const cors = require('cors');
 require('dotenv').config();
 
 const { PrismaClient } = require('@prisma/client');
-global.prisma = new PrismaClient();
+const prisma = new PrismaClient();
+global.prisma = prisma;
 
-const authRoutes = require('./routes/auth');
-const artisanRoutes = require('./routes/artisan');
-const serviceRoutes = require('./routes/service');
-const reviewRoutes = require('./routes/review');
-const studentRoutes = require('./routes/student');
-const adminRoutes = require('./routes/admin');
-const materialRoutes = require('./routes/material');
-const vendorRoutes = require('./routes/vendor');
-const menuRoutes = require('./routes/menu');
-const foodOrderRoutes = require('./routes/foodOrder');
-const accommodationRoutes = require('./routes/accommodation');
-const groupProjectRoutes = require('./routes/groupProject');
-const tutorRoutes = require('./routes/tutor');
-const resitSquadRoutes = require('./routes/resitSquad');
-const ridePoolRoutes = require('./routes/ridePool');
-const safeWalkRoutes = require('./routes/safeWalk');
+const authRoutes = require('./Src/routes/auth');
+const artisanRoutes = require('./Src/routes/artisan');
+const serviceRoutes = require('./Src/routes/service');
+const reviewRoutes = require('./Src/routes/review');
+const studentRoutes = require('./Src/routes/student');
+const adminRoutes = require('./Src/routes/admin');
+const materialRoutes = require('./Src/routes/material');
+const vendorRoutes = require('./Src/routes/vendor');
+const menuRoutes = require('./Src/routes/menu');
+const foodOrderRoutes = require('./Src/routes/foodOrder');
+const accommodationRoutes = require('./Src/routes/accommodation');
+const groupProjectRoutes = require('./Src/routes/groupProject');
+const tutorRoutes = require('./Src/routes/tutor');
+const resitSquadRoutes = require('./Src/routes/resitSquad');
+const ridePoolRoutes = require('./Src/routes/ridePool');
+const safeWalkRoutes = require('./Src/routes/safeWalk');
+const printShopRoutes = require('./Src/routes/print');
 
 const app = express();
 
@@ -48,6 +50,7 @@ app.use('/api/tutors', tutorRoutes);
 app.use('/api/resit-squads', resitSquadRoutes);
 app.use('/api/ride-pools', ridePoolRoutes);
 app.use('/api/safe-walks', safeWalkRoutes);
+app.use('/api/print-shops', printShopRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });

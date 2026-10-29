@@ -57,39 +57,40 @@ enum TutorSessionStatus {
 }
 
 model User {
-  id                   String   @id @default(uuid())
-  phone                String   @unique
-  password             String
-  name                 String
-  email                String?  @unique
-  role                 Role     @default(STUDENT)
-  school               School
-  department           String?
-  studentId            String?  @unique
-  profileImage         String?
-  isVerified           Boolean  @default(false)
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(uuid())
+  phone        String   @unique
+  password     String
+  name         String
+  email        String?  @unique
+  role         Role     @default(STUDENT)
+  school       School
+  department   String?
+  studentId    String?  @unique
+  profileImage String?
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  serviceRequests      ServiceRequest[] @relation("StudentRequests")
-  reviewsGiven         Review[] @relation("Reviewer")
-  reviewsReceived      Review[] @relation("Reviewee")
-  artisanProfile       Artisan?
-  materials            Material[]
-  foodOrders           FoodOrder[]
-  accommodations       Accommodation[]
+  serviceRequests        ServiceRequest[]       @relation("StudentRequests")
+  reviewsGiven           Review[]               @relation("Reviewer")
+  reviewsReceived        Review[]               @relation("Reviewee")
+  artisanProfile         Artisan?
+  materials              Material[]
+  foodOrders             FoodOrder[]
+  accommodations         Accommodation[]
   accommodationInquiries AccommodationInquiry[]
-  ownedProjects        GroupProject[] @relation("ProjectOwner")
-  projectApplications  ProjectApplication[]
-  projectMemberships   ProjectMember[]
-  tutorProfile         Tutor?
-  tutorSessionsAsStudent TutorSession[] @relation("StudentSessions")
-  resitSquadsCreated   ResitSquad[] @relation("SquadCreator")
-  resitSquadMemberships ResitSquadMember[]
-  ridePoolsCreated     RidePool[] @relation("RidePoolCreator")
-  ridePoolMemberships  RidePoolMember[]
-  safeWalksCreated     SafeWalk[] @relation("SafeWalkCreator")
-  safeWalkMemberships  SafeWalkMember[]
+  ownedProjects          GroupProject[]         @relation("ProjectOwner")
+  projectApplications    ProjectApplication[]
+  projectMemberships     ProjectMember[]
+  tutorProfile           Tutor?
+  tutorSessionsAsStudent TutorSession[]         @relation("StudentSessions")
+  resitSquadsCreated     ResitSquad[]           @relation("SquadCreator")
+  resitSquadMemberships  ResitSquadMember[]
+  ridePoolsCreated       RidePool[]             @relation("RidePoolCreator")
+  ridePoolMemberships    RidePoolMember[]
+  safeWalksCreated       SafeWalk[]             @relation("SafeWalkCreator")
+  safeWalkMemberships    SafeWalkMember[]
+  printJobs              PrintJob[]
 
   @@map("users")
 }
@@ -113,7 +114,7 @@ model Artisan {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
-  user            User?    @relation(fields: [userId], references: [id])
+  user            User?            @relation(fields: [userId], references: [id])
   serviceRequests ServiceRequest[]
   reviews         Review[]
 
@@ -134,11 +135,11 @@ model ServiceRequest {
   createdAt   DateTime      @default(now()) @map("created_at")
   updatedAt   DateTime      @updatedAt @map("updated_at")
 
-  studentId   String        @map("student_id")
-  student     User          @relation("StudentRequests", fields: [studentId], references: [id])
-  artisanId   String?       @map("artisan_id")
-  artisan     Artisan?      @relation(fields: [artisanId], references: [id])
-  review      Review?
+  studentId String   @map("student_id")
+  student   User     @relation("StudentRequests", fields: [studentId], references: [id])
+  artisanId String?  @map("artisan_id")
+  artisan   Artisan? @relation(fields: [artisanId], references: [id])
+  review    Review?
 
   @@map("service_requests")
 }
@@ -193,55 +194,50 @@ model Vendor {
   school      School
   location    String
   address     String?
+  description String?
   openingTime String?  @map("opening_time")
   closingTime String?  @map("closing_time")
-  logoUrl     String?  @map("logo_url")
   isVerified  Boolean  @default(false)
-  isOpen      Boolean  @default(true)
   rating      Float    @default(0)
   reviewCount Int      @default(0) @map("review_count")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  menuItems FoodOrderItem[]
+  menuItems MenuItem[]
   orders    FoodOrder[]
 
   @@map("vendors")
 }
 
 model MenuItem {
-  id               String   @id @default(uuid())
-  vendorId         String   @map("vendor_id")
-  name             String
-  description      String?
-  price            Float
-  category         String
-  imageUrl         String?  @map("image_url")
-  isAvailable      Boolean  @default(true)
-  isStudentSpecial Boolean  @default(false) @map("is_student_special")
-  preparationTime  Int?     @map("preparation_time")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(uuid())
+  vendorId    String   @map("vendor_id")
+  vendor      Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  price       Float
+  category    String
+  imageUrl    String?  @map("image_url")
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  vendor     Vendor          @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   orderItems FoodOrderItem[]
 
   @@map("menu_items")
 }
 
 model FoodOrder {
-  id             String          @id @default(uuid())
-  studentId      String          @map("student_id")
-  student        User            @relation(fields: [studentId], references: [id])
-  vendorId       String          @map("vendor_id")
-  vendor         Vendor          @relation(fields: [vendorId], references: [id])
-  status         FoodOrderStatus @default(PENDING)
-  totalAmount    Float           @map("total_amount")
-  pickupLocation String?         @map("pickup_location")
-  notes          String?
-  deliveryFee    Float?          @map("delivery_fee")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
+  id             String   @id @default(uuid())
+  vendorId       String   @map("vendor_id")
+  vendor         Vendor   @relation(fields: [vendorId], references: [id])
+  studentId      String   @map("student_id")
+  student        User     @relation(fields: [studentId], references: [id])
+  totalPrice     Float    @map("total_price")
+  status         String   @default("PENDING")
+  pickupLocation String?  @map("pickup_location")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   items FoodOrderItem[]
 
@@ -249,14 +245,14 @@ model FoodOrder {
 }
 
 model FoodOrderItem {
-  id         String   @id @default(uuid())
-  orderId    String   @map("order_id")
+  id         String    @id @default(uuid())
+  orderId    String    @map("order_id")
   order      FoodOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  menuItemId String   @map("menu_item_id")
-  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  menuItemId String    @map("menu_item_id")
+  menuItem   MenuItem  @relation(fields: [menuItemId], references: [id])
   quantity   Int
-  unitPrice  Float    @map("unit_price")
-  subtotal   Float
+  price      Float
+  createdAt  DateTime  @default(now()) @map("created_at")
 
   @@map("food_order_items")
 }
@@ -288,49 +284,49 @@ model Accommodation {
 }
 
 model AccommodationInquiry {
-  id              String   @id @default(uuid())
-  accommodationId String   @map("accommodation_id")
+  id              String        @id @default(uuid())
+  accommodationId String        @map("accommodation_id")
   accommodation   Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
-  studentId       String   @map("student_id")
-  student         User     @relation(fields: [studentId], references: [id])
-  status          String   @default("PENDING")
+  studentId       String        @map("student_id")
+  student         User          @relation(fields: [studentId], references: [id])
+  status          String        @default("PENDING")
   message         String?
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
 
   @@map("accommodation_inquiries")
 }
 
 model GroupProject {
-  id            String        @id @default(uuid())
-  title         String
-  description   String
-  courseCode    String        @map("course_code")
-  department    String
-  school        School
-  maxMembers    Int           @map("max_members")
-  skillsNeeded  String[]      @map("skills_needed")
-  deadline      DateTime?
-  status        ProjectStatus @default(OPEN)
-  ownerId       String        @map("owner_id")
-  owner         User          @relation("ProjectOwner", fields: [ownerId], references: [id])
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
+  id           String        @id @default(uuid())
+  title        String
+  description  String
+  courseCode   String        @map("course_code")
+  department   String
+  school       School
+  maxMembers   Int           @map("max_members")
+  skillsNeeded String[]      @map("skills_needed")
+  deadline     DateTime?
+  status       ProjectStatus @default(OPEN)
+  ownerId      String        @map("owner_id")
+  owner        User          @relation("ProjectOwner", fields: [ownerId], references: [id])
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
 
-  members       ProjectMember[]
-  applications  ProjectApplication[]
+  members      ProjectMember[]
+  applications ProjectApplication[]
 
   @@map("group_projects")
 }
 
 model ProjectMember {
-  id        String   @id @default(uuid())
-  projectId String   @map("project_id")
+  id        String       @id @default(uuid())
+  projectId String       @map("project_id")
   project   GroupProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id])
-  role      String   @default("member")
-  joinedAt  DateTime @default(now()) @map("joined_at")
+  userId    String       @map("user_id")
+  user      User         @relation(fields: [userId], references: [id])
+  role      String       @default("member")
+  joinedAt  DateTime     @default(now()) @map("joined_at")
 
   @@unique([projectId, userId])
   @@map("project_members")
@@ -408,12 +404,12 @@ model ResitSquad {
 }
 
 model ResitSquadMember {
-  id         String     @id @default(uuid())
-  squadId    String     @map("squad_id")
-  squad      ResitSquad @relation(fields: [squadId], references: [id], onDelete: Cascade)
-  userId     String     @map("user_id")
-  user       User       @relation(fields: [userId], references: [id])
-  joinedAt   DateTime   @default(now()) @map("joined_at")
+  id       String     @id @default(uuid())
+  squadId  String     @map("squad_id")
+  squad    ResitSquad @relation(fields: [squadId], references: [id], onDelete: Cascade)
+  userId   String     @map("user_id")
+  user     User       @relation(fields: [userId], references: [id])
+  joinedAt DateTime   @default(now()) @map("joined_at")
 
   @@unique([squadId, userId])
   @@map("resit_squad_members")
@@ -480,4 +476,46 @@ model SafeWalkMember {
 
   @@unique([walkId, userId])
   @@map("safe_walk_members")
+}
+
+model PrintShop {
+  id           String   @id @default(uuid())
+  name         String
+  phone        String   @unique
+  email        String?  @unique
+  school       School
+  location     String
+  address      String?
+  openingTime  String?  @map("opening_time")
+  closingTime  String?  @map("closing_time")
+  pricePerPage Float    @default(10)
+  isVerified   Boolean  @default(false)
+  rating       Float    @default(0)
+  reviewCount  Int      @default(0) @map("review_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  jobs PrintJob[]
+
+  @@map("print_shops")
+}
+
+model PrintJob {
+  id          String    @id @default(uuid())
+  shopId      String    @map("shop_id")
+  shop        PrintShop @relation(fields: [shopId], references: [id])
+  studentId   String    @map("student_id")
+  student     User      @relation(fields: [studentId], references: [id])
+  documentUrl String    @map("document_url")
+  pageCount   Int       @map("page_count")
+  copies      Int       @default(1)
+  binding     Boolean   @default(false)
+  colorPrint  Boolean   @default(false) @map("color_print")
+  totalPrice  Float     @map("total_price")
+  status      String    @default("PENDING")
+  pickupTime  DateTime? @map("pickup_time")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("print_jobs")
 }
