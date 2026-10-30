@@ -109,6 +109,10 @@ exports.getArtisanRequests = async (req, res) => {
     if (!artisan) {
       return res.status(403).json({ message: 'You are not registered as an artisan.' });
     }
+    
+    if (!artisan.isVerified) {
+  return res.status(403).json({ message: 'Your artisan profile is pending verification.' });
+}
 
     const { status, page, limit } = req.query;
     const currentPage = parseInt(page) || 1;
