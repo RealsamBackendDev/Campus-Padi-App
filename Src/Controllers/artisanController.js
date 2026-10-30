@@ -74,6 +74,11 @@ exports.searchArtisans = async (req, res) => {
     const skip = (currentPage - 1) * pageLimit;
 
     const where = { isVerified: true };
+    if (req.user?.id) {
+  where.AND = [
+    { OR: [{ userId: { not: req.user.id } }, { userId: null }] },
+  ];
+}
 
     if (studentSchool && !shouldIncludeNearby) {
       where.schools = { has: studentSchool };

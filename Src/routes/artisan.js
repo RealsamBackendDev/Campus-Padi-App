@@ -13,7 +13,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 
 router.get('/', authenticate, searchArtisans);
 router.get('/:id', authenticate, getArtisanById);
-router.post('/', registerArtisan);
+router.post('/', authenticate, registerArtisan);
 router.get('/admin/pending', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), getPendingArtisans);
 router.patch('/:id/verify', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), verifyArtisan);
 
