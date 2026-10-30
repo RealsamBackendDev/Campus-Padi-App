@@ -218,3 +218,16 @@ exports.toggleOpenStatus = async (req, res) => {
     res.status(500).json({ message: 'Error updating vendor status', error: error.message });
   }
 };
+
+exports.getPendingVendors = async (req, res) => {
+  try {
+    const vendors = await prisma.vendor.findMany({
+      where: { isVerified: false },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, name: true, phone: true, school: true, location: true, createdAt: true },
+    });
+    res.json({ message: 'Pending vendors retrieved successfully', data: vendors });
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving pending vendors', error: error.message });
+  }
+};

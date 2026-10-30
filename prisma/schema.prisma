@@ -139,6 +139,8 @@ model ServiceRequest {
   student   User     @relation("StudentRequests", fields: [studentId], references: [id])
   artisanId String?  @map("artisan_id")
   artisan   Artisan? @relation(fields: [artisanId], references: [id])
+  paid             Boolean  @default(false)
+  paymentReference String?  @map("payment_reference")
   review    Review?
 
   @@map("service_requests")

@@ -15,6 +15,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 
 router.post('/', registerPrintShop);
 router.get('/', authenticate, searchPrintShops);
+router.get('/admin/pending', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), getPendingPrintShops);
 router.get('/:id', authenticate, getPrintShopById);
 router.patch('/:id/verify', authenticate, authorize('ADMIN', 'SUPER_ADMIN'), verifyPrintShop);
 router.post('/jobs', authenticate, upload.single('document'), createPrintJob);

@@ -300,3 +300,16 @@ exports.updatePrintJobStatus = async (req, res) => {
     res.status(500).json({ message: 'Error updating print job status', error: error.message });
   }
 };
+
+exports.getPendingPrintShops = async (req, res) => {
+  try {
+    const shops = await prisma.printShop.findMany({
+      where: { isVerified: false },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, name: true, phone: true, school: true, location: true, createdAt: true },
+    });
+    res.json({ message: 'Pending print shops retrieved successfully', data: shops });
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving pending print shops', error: error.message });
+  }
+};
