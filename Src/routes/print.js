@@ -10,6 +10,7 @@ const {
   getMyPrintJobs,
   getShopJobs,
   updatePrintJobStatus,
+  getPendingPrintShops
 } = require('../controllers/printController');
 const { authenticate, authorize } = require('../middleware/auth');
 

@@ -23,7 +23,9 @@ const resitSquadRoutes = require('./Src/routes/resitSquad');
 const ridePoolRoutes = require('./Src/routes/ridePool');
 const safeWalkRoutes = require('./Src/routes/safeWalk');
 const printShopRoutes = require('./Src/routes/print');
-const paymentRoutes = require('./routes/payment');
+const paymentRoutes = require('./Src/routes/payment');
+const messageRoutes = require('./Src/routes/message');
+
 
 const app = express();
 
@@ -53,6 +55,7 @@ app.use('/api/ride-pools', ridePoolRoutes);
 app.use('/api/safe-walks', safeWalkRoutes);
 app.use('/api/print-shops', printShopRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/messages', messageRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });

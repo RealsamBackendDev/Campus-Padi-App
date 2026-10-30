@@ -91,6 +91,7 @@ model User {
   safeWalksCreated       SafeWalk[]             @relation("SafeWalkCreator")
   safeWalkMemberships    SafeWalkMember[]
   printJobs              PrintJob[]
+  messagesSent Message[] @relation("SentMessages")
 
   @@map("users")
 }
@@ -134,7 +135,8 @@ model ServiceRequest {
   completedAt DateTime?     @map("completed_at")
   createdAt   DateTime      @default(now()) @map("created_at")
   updatedAt   DateTime      @updatedAt @map("updated_at")
-
+  messages Message[]
+    priceApproved Boolean @default(false)
   studentId String   @map("student_id")
   student   User     @relation("StudentRequests", fields: [studentId], references: [id])
   artisanId String?  @map("artisan_id")
@@ -520,4 +522,19 @@ model PrintJob {
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
   @@map("print_jobs")
+}
+
+model Message {
+  id        String         @id @default(uuid())
+  requestId String         @map("request_id")
+  request   ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  senderId  String         @map("sender_id")
+  sender    User           @relation("SentMessages", fields: [senderId], references: [id])
+  body      String?
+  fileUrl   String?        @map("file_url")
+  fileName  String?        @map("file_name")
+  readAt    DateTime?      @map("read_at")
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  @@map("messages")
 }

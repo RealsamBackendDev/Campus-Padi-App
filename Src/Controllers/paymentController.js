@@ -17,6 +17,9 @@ exports.initializePayment = async (req, res) => {
     if (request.paid) {
       return res.status(400).json({ message: 'This job has already been paid for.' });
     }
+        if (!request.priceApproved) {
+      return res.status(400).json({ message: 'The quoted price has not been approved yet.' });
+    }
     if (!request.price || request.price <= 0) {
       return res.status(400).json({ message: 'No price set for this job.' });
     }

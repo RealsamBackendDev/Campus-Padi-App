@@ -9,6 +9,8 @@ const {
   completeRequest,
   cancelRequest,
   getRequestById,
+  approvePrice,
+  disputePrice
 } = require('../controllers/serviceController');
 const { authenticate } = require('../middleware/auth');
 
@@ -20,5 +22,7 @@ router.get('/artisan/requests', authenticate, getArtisanRequests);
 router.patch('/:id/accept', authenticate, acceptRequest);
 router.patch('/:id/start', authenticate, startWork);
 router.patch('/:id/complete', authenticate, completeRequest);
+router.patch('/:id/approve-price', authenticate, approvePrice);
+router.patch('/:id/dispute-price', authenticate, disputePrice);
 
 module.exports = router;

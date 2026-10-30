@@ -70,7 +70,11 @@ exports.getMyRequests = async (req, res) => {
         description: true,
         location: true,
         status: true,
+        artisanId: true,
         price: true,
+        priceApproved: true,
+        paid: true,
+        paymentReference: true,
         createdAt: true,
         artisan: {
           select: {
@@ -122,8 +126,8 @@ exports.getArtisanRequests = async (req, res) => {
       school: { in: artisan.schools },
     };
 
-    if (status) {
-      where.status = status;
+        if (status) {
+      where.status = { in: status.split(',') };
     } else {
       where.status = { in: ['PENDING', 'ACCEPTED'] };
     }
@@ -143,6 +147,7 @@ exports.getArtisanRequests = async (req, res) => {
         location: true,
         budget: true,
         status: true,
+        artisanId: true,
         createdAt: true,
         student: {
           select: {
@@ -249,14 +254,19 @@ exports.completeRequest = async (req, res) => {
     if (!request) {
       return res.status(403).json({ message: 'You can only complete your own requests.' });
     }
+        if (price && request.budget && Number(price) > request.budget) {
+      return res.status(400).json({ message: `Price cannot exceed the agreed budget of ₦${request.budget}.` });
+    }
 
-    const updated = await prisma.serviceRequest.update({
+        const updated = await prisma.serviceRequest.update({
       where: { id },
       data: {
         status: 'COMPLETED',
         price: price || request.price,
+        priceApproved: false,
         completedAt: new Date(),
       },
+
       select: {
         id: true,
         status: true,
@@ -373,5 +383,52 @@ exports.getRequestById = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving request', error: error.message });
+  }
+};
+exports.approvePrice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const request = await prisma.serviceRequest.findFirst({
+      where: { id, studentId: userId, status: 'COMPLETED' },
+    });
+
+    if (!request) {
+      return res.status(404).json({ message: 'Completed request not found.' });
+    }
+
+    await prisma.serviceRequest.update({
+      where: { id },
+      data: { priceApproved: true },
+    });
+
+    res.json({ message: 'Price approved. You can now make payment.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error approving price', error: error.message });
+  }
+};
+
+exports.disputePrice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const request = await prisma.serviceRequest.findFirst({
+      where: { id, studentId: userId, status: 'COMPLETED' },
+    });
+
+    if (!request) {
+      return res.status(404).json({ message: 'Completed request not found.' });
+    }
+
+    await prisma.serviceRequest.update({
+      where: { id },
+      data: { status: 'IN_PROGRESS', price: null, completedAt: null, priceApproved: false },
+    });
+
+    res.json({ message: 'Price disputed. The job has been reopened for the artisan to re-quote.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error disputing price', error: error.message });
   }
 };

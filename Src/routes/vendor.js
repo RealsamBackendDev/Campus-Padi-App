@@ -5,6 +5,7 @@ const {
   getVendors,
   getVendorById,
   verifyVendor,
+  getPendingVendors,
   toggleOpenStatus,
 } = require('../controllers/vendorController');
 const { authenticate, authorize } = require('../middleware/auth');
