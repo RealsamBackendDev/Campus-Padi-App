@@ -3,7 +3,7 @@ const router = express.Router();
 const { sendMessage, getMessages } = require('../controllers/messageController');
 const { authenticate } = require('../middleware/auth');
 const { upload } = require('../utils/cloudinary');
-const { sendMessage, getMessages, sendListingMessage, getListingMessages } = require('../controllers/messageController');
+const { sendSellerMessage, getSellerMessages, sendListingMessage, getListingMessages } = require('../controllers/messageController');
 
 router.get('/request/:requestId', authenticate, getMessages);
 router.post('/request/:requestId', authenticate, upload.single('file'), sendMessage);

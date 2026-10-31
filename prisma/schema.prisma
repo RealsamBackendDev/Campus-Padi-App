@@ -94,6 +94,7 @@ model User {
   messagesSent Message[] @relation("SentMessages")
   lostFoundItems LostFoundItem[]
   marketplaceListings MarketplaceListing[]
+  studyDocuments StudyDocument[]
 
   @@map("users")
 }
@@ -579,4 +580,34 @@ model MarketplaceListing {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("marketplace_listings")
+}
+
+model StudyDocument {
+  id           String   @id @default(uuid())
+  school       School
+  title        String
+  courseCode   String?  @map("course_code")
+  description  String?
+  fileType     String   @map("file_type")
+  textContent  String   @map("text_content")
+  status       String   @default("PENDING")
+  uploadedById String   @map("uploaded_by_id")
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  chunks       StudyChunk[]
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("study_documents")
+}
+
+model StudyChunk {
+  id         String        @id @default(uuid())
+  documentId String        @map("document_id")
+  document   StudyDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  chunkIndex Int           @map("chunk_index")
+  content    String
+  embedding  Json
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  @@map("study_chunks")
 }

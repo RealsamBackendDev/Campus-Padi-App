@@ -27,6 +27,7 @@ const paymentRoutes = require('./Src/routes/payment');
 const messageRoutes = require('./Src/routes/message');
 const lostFoundRoutes = require('./Src/routes/lostFound');
 const marketplaceRoutes = require('./Src/routes/marketplace');
+const studyRoutes = require('./Src/routes/study');
 
 
 const app = express();
@@ -60,6 +61,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/lost-found', lostFoundRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
+app.use('/api/study', studyRoutes);
 
 
 app.use((req, res) => {
