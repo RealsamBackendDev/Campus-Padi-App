@@ -92,6 +92,7 @@ model User {
   safeWalkMemberships    SafeWalkMember[]
   printJobs              PrintJob[]
   messagesSent Message[] @relation("SentMessages")
+  lostFoundItems LostFoundItem[]
 
   @@map("users")
 }
@@ -537,4 +538,22 @@ model Message {
   createdAt DateTime       @default(now()) @map("created_at")
 
   @@map("messages")
+}
+
+model LostFoundItem {
+  id           String   @id @default(uuid())
+  school       School
+  type         String
+  title        String
+  description  String?
+  location     String
+  imageUrl     String?  @map("image_url")
+  contactPhone String   @map("contact_phone")
+  status       String   @default("OPEN")
+  userId       String   @map("user_id")
+  user         User     @relation(fields: [userId], references: [id])
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("lost_found_items")
 }

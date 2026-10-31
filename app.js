@@ -25,6 +25,7 @@ const safeWalkRoutes = require('./Src/routes/safeWalk');
 const printShopRoutes = require('./Src/routes/print');
 const paymentRoutes = require('./Src/routes/payment');
 const messageRoutes = require('./Src/routes/message');
+const lostFoundRoutes = require('./Src/routes/lostFound');
 
 
 const app = express();
@@ -56,6 +57,7 @@ app.use('/api/safe-walks', safeWalkRoutes);
 app.use('/api/print-shops', printShopRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/lost-found', lostFoundRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
