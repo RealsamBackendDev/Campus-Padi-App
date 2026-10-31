@@ -93,6 +93,7 @@ model User {
   printJobs              PrintJob[]
   messagesSent Message[] @relation("SentMessages")
   lostFoundItems LostFoundItem[]
+  marketplaceListings MarketplaceListing[]
 
   @@map("users")
 }
@@ -527,14 +528,16 @@ model PrintJob {
 
 model Message {
   id        String         @id @default(uuid())
-  requestId String         @map("request_id")
-  request   ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestId String?         @map("request_id")
+  request   ServiceRequest? @relation(fields: [requestId], references: [id], onDelete: Cascade)
   senderId  String         @map("sender_id")
   sender    User           @relation("SentMessages", fields: [senderId], references: [id])
   body      String?
   fileUrl   String?        @map("file_url")
   fileName  String?        @map("file_name")
   readAt    DateTime?      @map("read_at")
+   listingId String?         @map("listing_id")
+  listing   MarketplaceListing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
   createdAt DateTime       @default(now()) @map("created_at")
 
   @@map("messages")
@@ -556,4 +559,24 @@ model LostFoundItem {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("lost_found_items")
+}
+model MarketplaceListing {
+  id           String   @id @default(uuid())
+  school       School
+  title        String
+  description  String?
+  price        Float
+  category     String
+  condition    String
+  imageUrl     String?  @map("image_url")
+  location     String
+  contactPhone String   @map("contact_phone")
+  status       String   @default("AVAILABLE")
+  userId       String   @map("user_id")
+  messages Message[]
+  user         User     @relation(fields: [userId], references: [id])
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("marketplace_listings")
 }

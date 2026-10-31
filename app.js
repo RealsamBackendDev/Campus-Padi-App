@@ -26,6 +26,7 @@ const printShopRoutes = require('./Src/routes/print');
 const paymentRoutes = require('./Src/routes/payment');
 const messageRoutes = require('./Src/routes/message');
 const lostFoundRoutes = require('./Src/routes/lostFound');
+const marketplaceRoutes = require('./Src/routes/marketplace');
 
 
 const app = express();
@@ -58,12 +59,14 @@ app.use('/api/print-shops', printShopRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/lost-found', lostFoundRoutes);
+app.use('/api/marketplace', marketplaceRoutes);
+
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`CampusPadi API running on port ${PORT}`);
 });
