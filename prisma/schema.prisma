@@ -95,6 +95,7 @@ model User {
   lostFoundItems LostFoundItem[]
   marketplaceListings MarketplaceListing[]
   studyDocuments StudyDocument[]
+  studyQueries StudyQuery[]
 
   @@map("users")
 }
@@ -610,4 +611,16 @@ model StudyChunk {
   createdAt  DateTime      @default(now()) @map("created_at")
 
   @@map("study_chunks")
+}
+model StudyQuery {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  question  String
+  answer    String
+  sources   Json?
+  mode      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("study_queries")
 }
