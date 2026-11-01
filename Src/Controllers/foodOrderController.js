@@ -124,20 +124,23 @@ exports.getMyFoodOrders = async (req, res) => {
 
     const orders = await prisma.foodOrder.findMany({
       where,
-      select: {
+            select: {
         id: true,
         status: true,
-        totalAmount: true,
+        totalPrice: true,
         pickupLocation: true,
-        deliveryFee: true,
         createdAt: true,
         vendor: {
+          select: { id: true, name: true, location: true },
+        },
+        items: {
           select: {
-            id: true,
-            name: true,
-            location: true,
+            quantity: true,
+            price: true,
+            menuItem: { select: { name: true } },
           },
         },
+      
         items: {
           select: {
             quantity: true,
